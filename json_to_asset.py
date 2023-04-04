@@ -70,10 +70,12 @@ class Parser:
                 type_code = cpu_string[6:8]
                 model = cpu_string[cpu_string.find('(') + 1: -1].title()
                 cores = cpu_string.split('(')[1].split(' ')[0]
+                speed = ''
             if cpu_string.startswith('Intel(R)'):
                 type_code = f"C{cpu_string.split()[2][:2].upper()}"
                 model = cpu_string.split()[2]
                 cores = '0'
+                speed = cpu_string.split()[-1]
 
             # Extract number of cores from string
 
@@ -81,7 +83,8 @@ class Parser:
                         "description": description,
                          "type_code": type_code,
                          "model": model,
-                         "cores": cores})
+                         "cores": cores,
+                         "speed": speed})
         return cpus
 
     def parse_hdds(self, report: dict):
@@ -196,8 +199,8 @@ def main():
             devices = parser.parse_file(input_file_path=input_file)
 
             # Export each device from the report
-            # for device in devices:
-            #     device.export(output_directory)
+            for device in devices:
+                device.export(output_directory)
             # devices[0].export(output_directory)
 
         # Move file to archive

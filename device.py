@@ -41,8 +41,8 @@ class DeviceTemplate:
                      self.comp.get('manufacturer'), '', '', self.comp.get('anumber'), '', '']
 
         for cpu in self.cpus:
-            cpu_vars = [self.location, computer_id, 'cpu',cpu.get('id'), cpu.get('description'), cpu.get('cores'),
-                        cpu.get('type_code'), '', cpu.get('model'), '', '', '', '', '', '']
+            cpu_vars = [self.location, computer_id, 'cpu', cpu.get('id'), cpu.get('description'), cpu.get('cores'),
+                        cpu.get('type_code'), cpu.get('speed'), cpu.get('model'), '', '', '', '', '', '']
             self._cpu_vars.append(cpu_vars)
 
         for hdd in self.hdds:
