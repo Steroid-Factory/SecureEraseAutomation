@@ -15,10 +15,12 @@ class DeviceTemplate:
     _comp_vars: list = field(default_factory=list)
     _cpu_vars: list = field(default_factory=list)
     _hdd_vars: list = field(default_factory=list)
+    _battery_vars: list = field(default_factory=list)
     location: str = field(default_factory=str)
     comp: dict = field(default_factory=dict)
     cpus: list = field(default_factory=list)
     hdds: list = field(default_factory=list)
+    battery: dict = field(default_factory=dict)
 
     def __post_init__(self):
         self.logger = logging.getLogger(__name__)
@@ -50,7 +52,8 @@ class DeviceTemplate:
                         hdd.get('type'), hdd.get('wipe_method'), '']
             self._hdd_vars.append(hdd_vars)
 
-
+        self._battery_vars = [self.location, computer_id, 'bat', 'bat', '', '', '', self.battery.get('status'),
+                              '', '', '', '', '', '', self.battery.get('health')]
 
 
     def export(self, file_dir: str) -> None:
@@ -73,7 +76,11 @@ class DeviceTemplate:
                     file.write('\t'.join(f'"{x}"' for x in hdd))
                     file.write('\n')
 
+                # Write out all the comp elements into one line
+                file.write('\t'.join(f'"{x}"' for x in self._battery_vars))
+                file.write('\n')
+
             self.logger.info(f"Created file {file_name} with "
                          f"Serial Number: '{self._comp_vars[4]}' and "
-                         f"Barcode: '{self._comp_vars[8]}' and"
+                         f"Barcode: '{self._comp_vars[8]}' and "
                          f"Computer Id: '{self._comp_vars[1]}'")

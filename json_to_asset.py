@@ -44,7 +44,7 @@ class Parser:
             self.logger.warning(f"Serial Number '{serial}' does not have a barcode")
             barcode = ''
         else:
-            report.get('Asset ID').split(" ")[-1]
+            barcode = report.get('Asset ID').split(" ")[-1]
         Anumber = report.get("'A' Number")
 
         comp = {"serial": serial,
@@ -130,6 +130,14 @@ class Parser:
 
         return hdds
 
+    def parse_battery(self, report: dict):
+        health = report.get('Battery Health', 0)
+        if int(health) >= 60:
+            status = '1'
+        else:
+            status = '0'
+
+        return {"health": health, "status": status}
 
 
     def parse_file(self, input_file_path) -> DeviceTemplate:
@@ -140,11 +148,17 @@ class Parser:
                 if report.get("'A' Number") == "N/A":
                     self.logger.warning(f"{report.get('Serial Number')} does not have an A Number - skipping")
                     continue
+
+                if report.get('Asset ID') == "N/A":
+                    self.logger.warning(f"{report.get('Serial Number')} does not have an A Barcode - skipping")
+                    continue
+
                 device = DeviceTemplate()
                 device.location = report.get("Securaze User")
                 device.comp = self.parse_comp(report)
                 device.cpus = self.parse_cpus(report)
                 device.hdds = self.parse_hdds(report)
+                device.battery = self.parse_battery(report)
                 device.compile()
                 devices.append(device)
         return devices

@@ -1,3 +1,5 @@
+import logging
+
 import win32serviceutil
 import win32service
 import win32event
@@ -40,7 +42,6 @@ class MyHandler(FileSystemEventHandler):
             # Move file to archive
             if os.path.exists(input_file):
                 shutil.move(input_file, self.archive_directory)
-
 
 class SecureEraseSvc (win32serviceutil.ServiceFramework):
     _svc_name_ = "SecureEraseService"
