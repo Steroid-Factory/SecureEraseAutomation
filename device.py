@@ -7,7 +7,12 @@ import logging
 # logging.basicConfig(filename='C:/secure_erase/export.log', level=logging.INFO,
 #                     format='%(asctime)s %(levelname)s %(message)s')
 
-
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+handler = logging.FileHandler('C:/secure_erase/export.log')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 @dataclass
 class DeviceTemplate:
@@ -22,14 +27,14 @@ class DeviceTemplate:
     hdds: list = field(default_factory=list)
     battery: dict = field(default_factory=dict)
 
-    def __post_init__(self):
-        self.logger = logging.getLogger(__name__)
-        handler = logging.FileHandler('C:/secure_erase/export.log')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
-        handler.setFormatter(formatter)
-        self.logger.setLevel(logging.INFO)
-        self.logger.addHandler(handler)
+    # def __post_init__(self):
+    #     self.logger.setLevel(logging.INFO)
+    #     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    #     handler = logging.FileHandler('C:/secure_erase/export.log')
+    #     handler.setFormatter(formatter)
+    #
+    #     self.logger.addHandler(handler)
 
 
     def compile(self):
@@ -58,7 +63,6 @@ class DeviceTemplate:
 
     def export(self, file_dir: str) -> None:
         if os.path.exists(file_dir):
-
             # Create file name with UUID.txt
             file_name = f'{str(uuid.uuid1()).upper()}.txt'
             with open(f'{file_dir}{file_name}', 'w') as file:
@@ -79,8 +83,7 @@ class DeviceTemplate:
                 # Write out all the comp elements into one line
                 file.write('\t'.join(f'"{x}"' for x in self._battery_vars))
                 file.write('\n')
-
-            self.logger.info(f"Created file {file_name} with "
+            logger.info(f"Created file {file_name} with "
                          f"Serial Number: '{self._comp_vars[4]}' and "
                          f"Barcode: '{self._comp_vars[8]}' and "
                          f"Computer Id: '{self._comp_vars[1]}'")

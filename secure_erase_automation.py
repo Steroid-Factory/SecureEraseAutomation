@@ -102,23 +102,24 @@ class SecureEraseSvc (win32serviceutil.ServiceFramework):
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        if os.environ.get('DEBUG', None):
-            event_handler = MyHandler(input_directory='c:/temp/in/', output_directory='c:/temp/out/',
-                                      archive_directory='c:/temp/archive')
 
-            observer = Observer()
-
-            observer.schedule(event_handler, path='c:/temp/in', recursive=False)
-            observer.start()
-            event_handler.on_created(None)
-            while True:
-                time.sleep(1)
-
-            observer.stop()
-            observer.join()
-        else:
-            servicemanager.Initialize()
-            servicemanager.PrepareToHostSingle(SecureEraseSvc)
-            servicemanager.StartServiceCtrlDispatcher()
+        # if os.environ.get('DEBUG', None):
+        #     event_handler = MyHandler(input_directory='c:/temp/in/', output_directory='c:/temp/out/',
+        #                               archive_directory='c:/temp/archive')
+        #
+        #     observer = Observer()
+        #
+        #     observer.schedule(event_handler, path='c:/temp/in', recursive=False)
+        #     observer.start()
+        #     event_handler.on_created(None)
+        #     while True:
+        #         time.sleep(1)
+        #
+        #     observer.stop()
+        #     observer.join()
+        # else:
+        servicemanager.Initialize()
+        servicemanager.PrepareToHostSingle(SecureEraseSvc)
+        servicemanager.StartServiceCtrlDispatcher()
     else:
         win32serviceutil.HandleCommandLine(SecureEraseSvc)

@@ -5,25 +5,24 @@ import shutil
 
 import logging
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+handler = logging.FileHandler('C:/secure_erase/processing.log')
+handler.setFormatter(formatter)
+
+logger.addHandler(handler)
 
 class Parser:
     def __init__(self):
-        self.logger = logging.getLogger(__name__)
-        handler = logging.FileHandler('C:/secure_erase/processing.log')
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-
-
-        handler.setFormatter(formatter)
-        self.logger.setLevel(logging.INFO)
-        self.logger.addHandler(handler)
-
+        pass
     def can_parse(self, input_file_path: str) -> bool:
         if not os.path.exists(input_file_path):
-            self.logger.error(f"File '{input_file_path}' does not exist")
+            logger.error(f"File '{input_file_path}' does not exist")
             return False
 
         if not input_file_path.endswith(".json"):
-            self.logger.error(f"File '{input_file_path}' is not a .json format")
+            logger.error(f"File '{input_file_path}' is not a .json format")
             return False
 
 
@@ -41,7 +40,7 @@ class Parser:
             start_index = model.find('[')
             model = model[start_index + 1:].split(" ")[0]
         if report.get('Asset ID') == 'N/A':
-            self.logger.warning(f"Serial Number '{serial}' does not have a barcode")
+            logger.warning(f"Serial Number '{serial}' does not have a barcode")
             barcode = ''
         else:
             barcode = report.get('Asset ID').split(" ")[-1]
@@ -135,10 +134,17 @@ class Parser:
 
     def parse_battery(self, report: dict):
         health = report.get('Battery Health', 0)
-        if int(health) >= 60:
-            status = '1'
-        else:
+        try:
+            if health == 'Normal':
+                logger.warning(f"{report.get('Serial Number')} health value is Normal instead of an integer")
+                status = '1'
+            elif int(health) >= 60:
+                status = '1'
+            else:
+                status = '0'
+        except ValueError:
             status = '0'
+            logger.warning(f"{report.get('Serial Number')} health value is not an integer")
 
         return {"health": health, "status": status}
 
@@ -149,11 +155,11 @@ class Parser:
             reports = json.load(file)['PCProduct']
             for report in reports:
                 if report.get("'A' Number") == "N/A":
-                    self.logger.warning(f"{report.get('Serial Number')} does not have an A Number - skipping")
+                    logger.warning(f"{report.get('Serial Number')} does not have an A Number - skipping")
                     continue
 
                 if report.get('Asset ID') == "N/A":
-                    self.logger.warning(f"{report.get('Serial Number')} does not have an A Barcode - skipping")
+                    logger.warning(f"{report.get('Serial Number')} does not have an A Barcode - skipping")
                     continue
 
                 device = DeviceTemplate()
