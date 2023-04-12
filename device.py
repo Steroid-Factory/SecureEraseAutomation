@@ -3,6 +3,7 @@ import datetime
 import os
 import uuid
 import logging
+import secrets
 
 # logging.basicConfig(filename='C:/secure_erase/export.log', level=logging.INFO,
 #                     format='%(asctime)s %(levelname)s %(message)s')
@@ -21,11 +22,13 @@ class DeviceTemplate:
     _cpu_vars: list = field(default_factory=list)
     _hdd_vars: list = field(default_factory=list)
     _battery_vars: list = field(default_factory=list)
+    _mem_vars: list = field(default_factory=list)
     location: str = field(default_factory=str)
     comp: dict = field(default_factory=dict)
     cpus: list = field(default_factory=list)
     hdds: list = field(default_factory=list)
     battery: dict = field(default_factory=dict)
+    memory: dict = field(default_factory=dict)
 
 
     # def __post_init__(self):
@@ -60,11 +63,14 @@ class DeviceTemplate:
         self._battery_vars = [self.location, computer_id, 'bat', 'bat', '', '', '', self.battery.get('status'),
                               '', '', '', '', '', '', self.battery.get('health')]
 
+        self._mem_vars = [self.location, computer_id, 'mem', 'mem', self.memory.get('capacity'),
+                          self.memory.get('type'), '', '', '', '', '', '', '', '']
 
     def export(self, file_dir: str) -> None:
         if os.path.exists(file_dir):
-            # Create file name with UUID.txt
-            file_name = f'{str(uuid.uuid1()).upper()}.txt'
+            # Create file name with unique name.txt
+            file_name = f'SE_{datetime.date.today().strftime("%m-%d-%Y")}_{secrets.token_hex(8)}.txt'
+
             with open(f'{file_dir}{file_name}', 'w') as file:
                 # Write out all the comp elements into one line
                 file.write('\t'.join(f'"{x}"' for x in self._comp_vars))
@@ -83,6 +89,11 @@ class DeviceTemplate:
                 # Write out all the comp elements into one line
                 file.write('\t'.join(f'"{x}"' for x in self._battery_vars))
                 file.write('\n')
+
+                # Write out all the comp elements into one line
+                file.write('\t'.join(f'"{x}"' for x in self._mem_vars))
+                file.write('\n')
+
             logger.info(f"Created file {file_name} with "
                          f"Serial Number: '{self._comp_vars[4]}' and "
                          f"Barcode: '{self._comp_vars[8]}' and "

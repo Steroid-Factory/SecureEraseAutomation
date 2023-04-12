@@ -4,6 +4,7 @@ from device import DeviceTemplate
 import shutil
 
 import logging
+import datetime
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -17,14 +18,19 @@ class Parser:
     def __init__(self):
         pass
     def can_parse(self, input_file_path: str) -> bool:
+        # Skip if file path doesn't exist
         if not os.path.exists(input_file_path):
             logger.error(f"File '{input_file_path}' does not exist")
             return False
 
+        # Skip if not a .json
         if not input_file_path.endswith(".json"):
             logger.error(f"File '{input_file_path}' is not a .json format")
             return False
 
+        # Skip if config file
+        if 'config.json' in input_file_path:
+            return False
 
         return True
 
@@ -149,6 +155,12 @@ class Parser:
         return {"health": health, "status": status}
 
 
+    def parse_memory(self, report: dict):
+        capacity = report.get('RAM')
+        type = report.get('Configuration').split('/')[0].split(' ')[2]
+        return {"capacity": capacity, "type": type}
+
+
     def parse_file(self, input_file_path) -> DeviceTemplate:
         devices = []
         with open(input_file_path, 'r') as file:
@@ -168,6 +180,7 @@ class Parser:
                 device.cpus = self.parse_cpus(report)
                 device.hdds = self.parse_hdds(report)
                 device.battery = self.parse_battery(report)
+                device.memory = self.parse_memory(report)
                 device.compile()
                 devices.append(device)
         return devices
@@ -175,7 +188,7 @@ class Parser:
 
 def main():
     # Config file path
-    config_path = 'C:/secure_erase/config.json'
+    config_path = 'S:/ftp/Securaze/config.json'
 
     # Verify config exists
     if not os.path.exists(config_path):
@@ -195,6 +208,7 @@ def main():
         if not archive_directory.endswith("/"):
             archive_directory = archive_directory + '/'
 
+
     # Create parser
     parser = Parser()
 
@@ -207,16 +221,11 @@ def main():
             # Export each device from the report
             for device in devices:
                 device.export(output_directory)
-            # devices[0].export(output_directory)
+            devices[0].export(output_directory)
 
-        # Move file to archive
-        #shutil.move(input_file, archive_directory)
+            # Move file to archive
+            shutil.move(input_file, archive_directory)
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-    #print(parsed_dict)

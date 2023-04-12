@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['secure_erase_automation.py'],
+    ['json_to_asset.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -28,7 +28,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='SecureEraseService',
+    name='SecureEraseParser',
     debug=False,
     onefile=True,
     bootloader_ignore_signals=False,
