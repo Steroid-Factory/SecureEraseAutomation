@@ -4,7 +4,8 @@ from device import DeviceTemplate
 import shutil
 
 import logging
-import datetime
+#import datetime
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -122,10 +123,29 @@ class Parser:
                 wipe_status = "FAILED"
                 wipe_status_number = "0"
 
-            wipe_method = report.get('Data Wipe Method').split(',')[number - 1].split('/')[1].strip()
-            wipe_started = report.get('Data Wipe Started').split(',')[number - 1].split('/')[1].strip()[:-4]
-            wipe_finished = report.get('Data Wipe Finished').split(',')[number - 1].split('/')[1].strip()[:-4]
+            if report.get('Data Wipe Method') == 'N/A':
+                wipe_method = ''
+            else:
+                wipe_method = report.get('Data Wipe Method').split(',')[number - 1].split('/')[1].strip()
 
+            original_time_format = ('%Y-%m-%d %H:%M:%S')
+            final_time_format = ('%d-%m-%Y %H:%M:%S')
+
+            # The raw datetime string
+            started_string = report.get('Data Wipe Started').split(',')[number - 1].split('/')[1].strip()[:-4]
+            finished_string = report.get('Data Wipe Finished').split(',')[number - 1].split('/')[1].strip()[:-4]
+
+            if started_string == '' or finished_string == '':
+                wipe_started = ''
+                wipe_finished = ''
+            else:
+                # Convert to datetime
+                started_datetime = datetime.strptime(started_string, original_time_format)
+                finished_datetime = datetime.strptime(finished_string, original_time_format)
+
+                # Convert datetime format to final format
+                wipe_started = started_datetime.strftime(final_time_format)
+                wipe_finished = finished_datetime.strftime(final_time_format)
 
             hdds.append({"id": component_id,
                          "serial": serial,
@@ -185,6 +205,7 @@ class Parser:
                 device.battery = self.parse_battery(report)
                 device.memory = self.parse_memory(report)
                 device.compile()
+                print(device._hdd_vars)
                 devices.append(device)
         return devices
 
@@ -224,7 +245,6 @@ def main():
             # Export each device from the report
             for device in devices:
                 device.export(output_directory)
-            devices[0].export(output_directory)
 
             # Move file to archive
             shutil.move(input_file, archive_directory)
