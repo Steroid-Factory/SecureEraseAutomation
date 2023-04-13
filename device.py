@@ -30,16 +30,7 @@ class DeviceTemplate:
     battery: dict = field(default_factory=dict)
     memory: dict = field(default_factory=dict)
 
-
-    # def __post_init__(self):
-    #     self.logger.setLevel(logging.INFO)
-    #     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-    #     handler = logging.FileHandler('C:/secure_erase/export.log')
-    #     handler.setFormatter(formatter)
-    #
-    #     self.logger.addHandler(handler)
-
-
+    # Converts dictionary to list for export
     def compile(self):
         # UUID as Computer Id
         computer_id = str(uuid.uuid1()).upper()
@@ -56,7 +47,7 @@ class DeviceTemplate:
         for hdd in self.hdds:
             hdd_vars = [self.location, computer_id, 'hd', hdd.get('id'), hdd.get('serial'), hdd.get('size'), '1',
                         hdd.get('wipe_status_number'), hdd.get('employee'), hdd.get('wipe_status'),
-                        hdd.get('wipe_timestamp'), hdd.get('wipe_timestamp'),
+                        hdd.get('wipe_started'), hdd.get('wipe_finished'),
                         hdd.get('type'), hdd.get('wipe_method'), '']
             self._hdd_vars.append(hdd_vars)
 
@@ -66,31 +57,34 @@ class DeviceTemplate:
         self._mem_vars = [self.location, computer_id, 'mem', 'mem', self.memory.get('capacity'),
                           self.memory.get('type'), '', '', '', '', '', '', '', '']
 
+    # Writes the list of components into a file
     def export(self, file_dir: str) -> None:
         if os.path.exists(file_dir):
             # Create file name with unique name.txt
             file_name = f'SE_{datetime.date.today().strftime("%m-%d-%Y")}_{secrets.token_hex(8)}.txt'
 
             with open(f'{file_dir}{file_name}', 'w') as file:
-                # Write out all the comp elements into one line
+                # Mask 0/ Comp
                 file.write('\t'.join(f'"{x}"' for x in self._comp_vars))
                 file.write('\n')
-                # For each cpu
+
+                # CPUs
                 for cpu in self._cpu_vars:
                     # Write out all the cpu elements into one line
                     file.write('\t'.join(f'"{x}"' for x in cpu))
                     file.write('\n')
-                # For each hdd
+
+                # Hard Drives
                 for hdd in self._hdd_vars:
                     # Write out all the hdd elements into one line
                     file.write('\t'.join(f'"{x}"' for x in hdd))
                     file.write('\n')
 
-                # Write out all the comp elements into one line
+                # Battery
                 file.write('\t'.join(f'"{x}"' for x in self._battery_vars))
                 file.write('\n')
 
-                # Write out all the comp elements into one line
+                # Memory
                 file.write('\t'.join(f'"{x}"' for x in self._mem_vars))
                 file.write('\n')
 

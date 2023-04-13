@@ -16,7 +16,9 @@ logger.addHandler(handler)
 
 class Parser:
     def __init__(self):
-        pass
+        ...
+
+    # Checks whether the file can be used by parser
     def can_parse(self, input_file_path: str) -> bool:
         # Skip if file path doesn't exist
         if not os.path.exists(input_file_path):
@@ -33,6 +35,7 @@ class Parser:
             return False
 
         return True
+
 
     def parse_comp(self, report: dict) -> dict:
         # Raw
@@ -82,8 +85,6 @@ class Parser:
                 cores = '0'
                 speed = cpu_string.split()[-1]
 
-            # Extract number of cores from string
-
             cpus.append({"id": component_id,
                         "description": description,
                          "type_code": type_code,
@@ -122,7 +123,8 @@ class Parser:
                 wipe_status_number = "0"
 
             wipe_method = report.get('Data Wipe Method').split(',')[number - 1].split('/')[1].strip()
-            wipe_timestamp = report.get('Data Wipe Timestamp').split(',')[number - 1].split('/')[1].strip()[:-4]
+            wipe_started = report.get('Data Wipe Started').split(',')[number - 1].split('/')[1].strip()[:-4]
+            wipe_finished = report.get('Data Wipe Finished').split(',')[number - 1].split('/')[1].strip()[:-4]
 
 
             hdds.append({"id": component_id,
@@ -134,7 +136,8 @@ class Parser:
                          "wipe_status": wipe_status,
                          "wipe_status_number": wipe_status_number,
                          "wipe_method": wipe_method,
-                         "wipe_timestamp": wipe_timestamp})
+                         "wipe_started": wipe_started,
+                         "wipe_finished": wipe_finished})
 
         return hdds
 
