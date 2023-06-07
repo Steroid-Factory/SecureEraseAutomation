@@ -28,7 +28,7 @@ class Parser:
 
         # Skip if not a .json
         if not input_file_path.endswith(".json"):
-            logger.error(f"File '{input_file_path}' is not a .json format")
+            # logger.error(f"File '{input_file_path}' is not a .json format")
             return False
 
         # Skip if config file
@@ -241,10 +241,13 @@ def main():
         input_file = f'{input_directory}{file}'
         if parser.can_parse(input_file):
             devices = parser.parse_file(input_file_path=input_file)
-
             # Export each device from the report
             for device in devices:
                 device.export(output_directory)
+
+            # Remove file from archive if exists
+            if os.path.isfile(f"{archive_directory}/{file}"):
+                os.remove(f"{archive_directory}/{file}")
 
             # Move file to archive
             shutil.move(input_file, archive_directory)
