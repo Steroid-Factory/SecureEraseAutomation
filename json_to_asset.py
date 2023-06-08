@@ -104,8 +104,8 @@ class Parser:
             component_id = f'hdd{number}'
 
             type = hdd_string.split(',')[0].replace('Type:', '').strip().upper()
-            model = hdd_string.split(',')[1].replace('Model:', '').strip()
-            size = hdd_string.split(',')[2].replace('Size:', '').strip()
+            model = hdd_string.split(',')[2].replace('Model:', '').strip()
+            size = hdd_string.split(',')[3].replace('Size:', '').strip()
 
             serial = report.get('Storage Serial').split(',')[number - 1].\
                 replace(f"Storage {number} / ", "").strip()
@@ -205,7 +205,6 @@ class Parser:
                 device.battery = self.parse_battery(report)
                 device.memory = self.parse_memory(report)
                 device.compile()
-                print(device._hdd_vars)
                 devices.append(device)
         return devices
 
